@@ -1,0 +1,52 @@
+# Block message with swear
+BlockSwear: false
+
+# Allow Operators to swear
+AllowOPSwear: false
+
+# Message sent to player when swear
+# If you don't want send any message, just leave it empty
+SwearMessage: "&4Don't swear!"
+
+
+
+
+# ATENTION
+# CONTENT BELOW DOES NOT LOOK NICE
+
+# Swears, disallowed words
+# Use as
+#    - swear: cen**red
+# (you can use colors &4)
+# Otherwise swear will be replaced by ***
+# 
+# NOTE: Put censored words between apostrophes
+Blacklist:
+- noob: 'n**b'
+- idiot: 'id**t'
+- ass: 'a**'
+- penis: 'pen*s'
+- vagina: 'va***a'
+- fuck: 'f**k'
+- dick: 'd**k'
+- pussy: 'p***y'
+- stupid: 'st*pid'
+- nerd: 'n**d'
+- stfu: 's***'
+- wtf: 'w**'
+- anus: 'a***'
+- arse: 'a***'
+- arsehole: 'a***'
+- asshole: 'a***'
+- butt: 'b**t'
+- bitch: 'b**ch'
+- crap: 'cr*p'
+- bastard: 'b*stard'
+- boobs: 'b**bs'
+- shit: 'sh*t'
+- piss: 'p*ss'
+
+# Words containing blacklisted words, but are enabled
+Whitelist:
+- badass
+- as
