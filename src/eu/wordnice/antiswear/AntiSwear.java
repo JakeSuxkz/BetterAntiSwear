@@ -172,19 +172,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	public static String removeTypos(String in) {
 		char[] inchars = in.toCharArray();
 		char[] out = new char[inchars.length];
-		int nevlen = AntiSwear.removeTypos(out, inchars, 0, in.length(), null);
-		return new String(out, 0, nevlen);
-	}
-	
-	/**
-	 * Make string readable for plugin, but do not remove dots and spaces
-	 * 
-	 * @see {@link AntiSwear#removeTyposSafe(char[], char[], int, int, int[], int[])}
-	 */
-	public static String removeTyposSafe(String in) {
-		char[] inchars = in.toCharArray();
-		char[] out = new char[inchars.length];
-		int nevlen = AntiSwear.removeTyposSafe(out, inchars, 0, in.length(), null);
+		int nevlen = AntiSwear.removeTypos(out, inchars, 0, in.length(), null, 0);
 		return new String(out, 0, nevlen);
 	}
 	
@@ -196,51 +184,29 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	 * @param off Offset of input buffer
 	 * @param len Length of input buffer
 	 * @param indexes Index of character (pair with out parameter; may be null)
+	 * @param ind_off Offset of indexes parameter
 	 * 
 	 * @return Length of new string (of `out` parameter)
 	 */
-	public static int removeTypos(char[] out, char[] bts, int off, int len, int[] indexes) {
+	public static int removeTypos(char[] out, char[] bts, int off, int len, int[] indexes, int ind_off) {
 		len += off;
 		int cur = off;
 		int outi = 0;
 		int prev = -1;
 		for(; cur < len; cur++) {
 			int c = AntiSwear.getSimiliar(bts[cur]);
-			if(c != prev && (Character.isLetter(c) || Character.isDigit(c))) {
-				prev = c;
-				if(indexes != null) {
-					indexes[outi] = cur;
+			if(Character.isLetter(c) || Character.isDigit(c)) {
+				if(c == prev) {
+					if(indexes != null) {
+						indexes[ind_off + outi - 1] = cur;
+					}
+				} else {
+					prev = c;
+					if(indexes != null) {
+						indexes[ind_off + outi] = cur;
+					}
+					out[outi++] = (char) c;
 				}
-				out[outi++] = (char) c;
-			}
-		}
-		return outi;
-	}
-	
-	/**
-	 * Make string readable for plugin, but do not remove dots and spaces
-	 * 
-	 * @param out Output buffer
-	 * @param bts Input buffer
-	 * @param off Offset of input buffer
-	 * @param len Length of input buffer
-	 * @param indexes Index of character (pair with out parameter)
-	 * 
-	 * @return Length of new string (of `out` parameter)
-	 */
-	public static int removeTyposSafe(char[] out, char[] bts, int off, int len, int[] indexes) {
-		len += off;
-		int cur = off;
-		int outi = 0;
-		int prev = -1;
-		for(; cur < len; cur++) {
-			int c = AntiSwear.getSimiliar(bts[cur]);
-			if(c != prev) {
-				prev = c;
-				if(indexes != null) {
-					indexes[outi] = cur;
-				}
-				out[outi++] = (char) c;
 			}
 		}
 		return outi;
@@ -308,12 +274,13 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	 * @param in_len Length of `in` string
 	 * @param indexes Pair with `edited`. The last `indexes` parameter from
 	 *        {@link AntiSwear#removeTypos(char[], char[], int, int, int[])}
+	 * @param ind_off Offset of indexes parameter
 	 * 
 	 * @return If any swear was matched, array from `in` parameter is modified 
 	 *         and is returned size of cenzored char arrray. Otherwise return `-1`
 	 */
 	public static String doReplace(char[] edited, int edited_off, int edited_len, 
-			char[] in, int in_off, int in_len, int[] indexes) {
+			char[] in, int in_off, int in_len, int[] indexes, int ind_off) {
 		edited_len += edited_off;
 		in_len += in_off;
 		boolean had = false;
@@ -329,41 +296,28 @@ public class AntiSwear extends JavaPlugin implements Listener {
 				}
 				char[] replaceto = AntiSwear.BLACKLIST[i1++];
 				if(AntiSwear.equals(edited, oeoff, swear, 0, swear.length)) {
-					int start = indexes[oeoff];
-					int end = indexes[oeoff + swear.length - 1];
-					
-					char end_char = AntiSwear.getSimiliar(in[end]);
-					while(true) {
-						if(AntiSwear.getSimiliar(in[end]) == end_char) {
-							end++;
-							if(end >= in_len) {
-								end = in_len - 1;
-								break;
-							}
-						} else {
-							end--;
-							break;
-						}
-					}
+					int start = indexes[ind_off + oeoff];
+					int end = indexes[ind_off + oeoff + swear.length - 1];
 						
 					int wh_index = -1;
 					int wh_len = 0;
 					for(int i2 = 0, n2 = AntiSwear.WHITELIST.length; i2 < n2; i2++) {
 						char[] wh = AntiSwear.WHITELIST[i2];
 						wh_len = wh.length;
-						if(wh.length <= swear.length) {
-							break;
-						}
+						
 						int chlen = wh_len - 1;
 						int choff = start - chlen;
 						if(choff < in_off) {
 							choff = in_off;
 						}
 						chlen = (chlen * 2) + wh_len;
-						if((chlen + choff) > in_off) {
+						if((chlen + choff) > in_len) {
 							chlen = in_len - in_off - choff;
 						}
 						wh_index = AntiSwear.indexOf(in, choff, chlen, wh, 0, wh_len);
+						if(wh_index == -1) {
+							wh_index = AntiSwear.indexOf(wh, 0, wh_len, in, choff, chlen);
+						}
 						if(wh_index != -1) {
 							break;
 						}
@@ -398,16 +352,34 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	 * @return If swear(s) were found, returns new modified string. Otherwise returns `null`
 	 */
 	public static String processString(String in, String[] mini) {
+		char[] chars_orig_un = in.toCharArray();
+		char[] chars_orig = new char[chars_orig_un.length + 2];
+		System.arraycopy(chars_orig_un, 0, chars_orig, 1, chars_orig_un.length);
+		chars_orig_un = null;
+		chars_orig[0] = ' ';
+		chars_orig[chars_orig.length - 1] = ' ';
+		
 		in = AntiSwear.stripDiacritics(in);
-		char[] chars = in.toCharArray();
-		char[] out = new char[chars.length];
-		int[] indexes = new int[chars.length];
+		
+		char[] chars_un = in.toCharArray();
+		char[] chars = new char[chars_un.length + 2];
+		System.arraycopy(chars_un, 0, chars, 1, chars_un.length);
+		chars_un = null;
+		chars[0] = ' ';
+		chars[chars.length - 1] = ' ';
+		
+		char[] out = new char[chars.length + 2];
+		int[] indexes = new int[chars.length + 2];
 		AntiSwear.stripNonDiacritics(chars, 0, chars.length);
-		int len = AntiSwear.removeTypos(out, chars, 0, chars.length, indexes);
+		int len = AntiSwear.removeTypos(out, chars, 0, chars.length, indexes, 0);
 		if(mini != null && mini.length >= 1) {
 			mini[0] = new String(out, 0, len);
 		}
-		return AntiSwear.doReplace(out, 0, len, chars, 0, chars.length, indexes);
+		String ret = AntiSwear.doReplace(out, 0, len, chars_orig, 0, chars_orig.length, indexes, 0);
+		if(ret != null) {
+			return ret.substring(1, ret.length() - 1);
+		}
+		return null;
 	}
 	
 	/**
@@ -503,7 +475,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 			if(i != msgs.length) {
 				msgs = Arrays.copyOf(msgs, i);
 			}
-			Arrays.sort(msgs);
+			AntiSwear.sort(msgs);
 			AntiSwear.WHITELIST = msgs;
 			this.getLogger().info("Loaded " + i + " whitelisted messages!");
 		} else {
@@ -552,8 +524,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 			int i = 0;
 			char[][] out = new char[n][];
 			while(it.hasNext() && i < n) {
-				Map<?, ?> map = it.next();
-				Iterator<? extends Entry<?, ?>> mapit = map.entrySet().iterator();
+				Iterator<? extends Entry<?, ?>> mapit = it.next().entrySet().iterator();
 				if(!mapit.hasNext()) {
 					continue;
 				}
@@ -578,7 +549,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	@EventHandler(ignoreCancelled=true)
 	public void onChat(AsyncPlayerChatEvent event) {
 		Player p = event.getPlayer();
-		if((this.allowOpSwear && p.isOp()) || p.hasPermission("BetterAntiSwear.Swear")) {
+		if(p == null || (this.allowOpSwear && p.isOp()) || p.hasPermission("BetterAntiSwear.Swear")) {
 			return;
 		}
 		String nevmsg = AntiSwear.processString(event.getMessage(), null);
