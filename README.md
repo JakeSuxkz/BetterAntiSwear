@@ -91,7 +91,21 @@ as
 
 # Permissions:
 
-If player has `BetterAntiSwear.Swear`, his messages will NOT be scanned.
+- `BetterAntiSwear.Swear` - If player has this permission, or `AllowOPSwear` from config is allowed and player is operator, his messages are not scaned
+- `BetterAntiSwear.Test` - Test message with `/bas test <message>` command
+
+
+# Commands
+
+## /bas
+
+* Permission `BetterAntiSwear.Test` or OP
+* Aliases `betterantiswear`, `antiswear`, `as`
+* Subcommands
+	* `test` - scan entered message
+
+![/bas test lel m8s i gotta rekt u stoopid idiots nubs](/screenshots/bas_test.png)
+
 
 
 # API:
@@ -100,11 +114,8 @@ See [commented sources](https://github.com/wordnice/BetterAntiSwear/blob/master/
 
 ```java
 	/**
-	 * High-level process string. Returns processed string with replaced
-	 * swears. Make sure you initialized second parameter, and check it if needed.
-	 * 
-	 * @param in Input string
-	 * @param mini If not null and length >= 1, first value is filled with minimalized string
+	 * @param in Message to check and process
+	 * @param mini If not null and length >= 1, mini[0] is filled with minimalized string
 	 * 
 	 * @return If swear(s) were found, returns new modified string. Otherwise returns `null`
 	 */

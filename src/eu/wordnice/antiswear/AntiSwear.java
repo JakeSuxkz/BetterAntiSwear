@@ -38,14 +38,22 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class AntiSwear extends JavaPlugin implements Listener {
+	
+	/**
+	 * Prefix of plugin
+	 */
+	public static String PREFIX = (ChatColor.GREEN + "[Better4nti5we*r] " + ChatColor.AQUA);
 	
 	/**
 	 * Pattern to remove diacritics
@@ -343,11 +351,8 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	}
 	
 	/**
-	 * High-level process string. Returns processed string with replaced
-	 * swears. Make sure you initialized second parameter, and check it if needed.
-	 * 
-	 * @param in Input string
-	 * @param mini If not null and length >= 1, first value is filled with minimalized string
+	 * @param in Message to check and process
+	 * @param mini If not null and length >= 1, mini[0] is filled with minimalized string
 	 * 
 	 * @return If swear(s) were found, returns new modified string. Otherwise returns `null`
 	 */
@@ -433,9 +438,19 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	public boolean allowOpSwear = false;
 	
 	/**
+	 * Allow Operators to swear on signs
+	 */
+	public boolean allowOpSignSwear = false;
+	
+	/**
 	 * Message sent to player on swear (may be `null` = no message)
 	 */
 	public String swearMessage = null;
+	
+	/**
+	 * Message sent to player on sign swear (may be `null` = no message)
+	 */
+	public String signSwearMessage = null;
 	
 	
 	/**
@@ -450,7 +465,9 @@ public class AntiSwear extends JavaPlugin implements Listener {
 		
 		this.blockSwear = cfg.getBoolean("BlockSwear", false);
 		this.allowOpSwear = cfg.getBoolean("AllowOPSwear", false);
+		this.allowOpSignSwear = cfg.getBoolean("AllowOPSignSwear", false);
 		this.swearMessage = cfg.getString("SwearMessage", null);
+		this.signSwearMessage = cfg.getString("SignSwearMessage", null);
 		if(this.swearMessage == null || this.swearMessage.length() == 0 || this.swearMessage.equalsIgnoreCase("null")) {
 			this.swearMessage = null;
 		} else {
@@ -540,6 +557,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 		}
 		
 		Bukkit.getPluginManager().registerEvents(this, this);
+		this.getCommand("antiswear").setExecutor(this);
 		this.getLogger().info("BetterAntiSwear by wordnice was enabled!");
 	}
 	
@@ -563,6 +581,47 @@ public class AntiSwear extends JavaPlugin implements Listener {
 				event.setMessage(nevmsg);
 			}
 		}
+	}
+	
+	/**
+	 * @param event Event
+	 * 
+	 * TODO
+	 */
+	//@EventHandler(ignoreCancelled=true)
+	public void onSignUpdate(SignChangeEvent event) {
+		Player p = event.getPlayer();
+		if(p == null || (this.allowOpSignSwear && p.isOp()) || p.hasPermission("BetterAntiSwear.SignSwear")) {
+			return;
+		}
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String typed, String[] args) {
+		if(args.length >= 1 && args[0].equalsIgnoreCase("test") 
+				&& (sender.isOp() || sender.hasPermission("BetterAntiSwear.Test"))) {
+			String msg = "";
+			for(int i = 1, n = args.length; i < n; i++) {
+				if(i != 1) {
+					msg += " ";
+				}
+				msg += args[i];
+			}
+			long start = System.nanoTime();
+			String[] mini = new String[1];
+			String process = AntiSwear.processString(msg, mini);
+			sender.sendMessage(new String[] {
+				(AntiSwear.PREFIX + msg),
+				(ChatColor.YELLOW + "" + ChatColor.ITALIC + "" + (System.nanoTime() - start) 
+						 + " ns, processed: " + ChatColor.YELLOW + mini[0]),
+				((process == null) ? (ChatColor.GREEN + msg) : (ChatColor.RED + process)),
+			});
+			return true;
+		} else if(sender.isOp() || sender.hasPermission("BetterAntiSwear.Test")) {
+			sender.sendMessage(AntiSwear.PREFIX + "/" + typed + " test <message>");
+			return true;
+		}
+		return false;
 	}
 	
 }

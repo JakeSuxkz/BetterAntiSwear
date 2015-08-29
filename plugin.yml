@@ -1,4 +1,11 @@
 name: BetterAntiSwear
-version: 1.0
+version: 1.1
 author: wordnice
 main: eu.wordnice.antiswear.AntiSwear
+description: 'Do not write hundreds of synonyms or complex regexes, when you can write just words.'
+
+commands:
+    bas:
+        usage: '/<command> test <message>'
+        description: 'Debug check process for entered message'
+        aliases: [betterantiswear, antiswear, as]
