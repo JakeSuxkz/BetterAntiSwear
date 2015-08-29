@@ -19,6 +19,7 @@ SwearMessage: "&4Don't swear!"
 
 
 
+
 # ATENTION
 # CONTENT BELOW DOES NOT LOOK NICE
 
@@ -34,7 +35,7 @@ Blacklist:
 - idiot: 'id**t'
 - ass: 'a**'
 - penis: 'pen*s'
-- vagina: 'va***a'
+- vagina: 'vag**a'
 - fuck: 'f**k'
 - dick: 'd**k'
 - pussy: 'p***y'
@@ -56,8 +57,8 @@ Blacklist:
 
 # Words containing blacklisted words, but are enabled
 Whitelist:
-- badass
-- as
+- ' badass '
+- ' as '
 
 ```
 
