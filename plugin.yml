@@ -1,5 +1,5 @@
 name: BetterAntiSwear
-version: 1.1
+version: 1.2
 author: wordnice
 main: eu.wordnice.antiswear.AntiSwear
 description: 'Do not write hundreds of synonyms or complex regexes, when you can write just words.'

@@ -144,7 +144,9 @@ public class AntiSwear extends JavaPlugin implements Listener {
 		switch(c) {	
 			case 'o':
 			case '0':
-				return 'u';
+			case 'u':
+			case 'w':
+				return 'v';
 				
 			case 'k':
 				return 'c';
@@ -155,6 +157,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 			case '3':
 			case '8':
 			case '€':
+			case 'y':
 				return 'i';
 				
 			case '4':
@@ -244,7 +247,30 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	}
 	
 	/**
-	 * Index of string (char array)
+	 * Case-insensitive equals method for char array
+	 * 
+	 * @param str1 String one
+	 * @param off1 Offset of string one
+	 * @param str2 String two
+	 * @param off2 Offset of string two
+	 * @param len Length to compare
+	 * 
+	 * @see {@link String#equals(Object)}
+	 * 
+	 * @return `true` If strings are too same
+	 */
+	public static boolean equalsIgnoreCase(char[] str1, int off1, char[] str2, int off2, int len) {
+		len += off1;
+		for(; off1 < len; off1++, off2++) {
+			if(Character.toLowerCase(str1[off1]) != Character.toLowerCase(str2[off2])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Case-insensitive index of string (char array)
 	 * 
 	 * @param str1 String one to explore
 	 * @param off1 Offset of string one
@@ -257,14 +283,14 @@ public class AntiSwear extends JavaPlugin implements Listener {
 	 * 
 	 * @return Index (offset) of string one, otherwise `-1` if not found.
 	 */
-	public static int indexOf(char[] str1, int off1, int len1, char[] str2, int off2, int len2) {
+	public static int indexOfIgnoreCase(char[] str1, int off1, int len1, char[] str2, int off2, int len2) {
 		if(len1 < len2) {
 			return -1;
 		}
 		len1 += off1;
 		len1 -= len2;
 		for(; off1 <= len1; off1++) {
-			if(AntiSwear.equals(str1, off1, str2, off2, len2)) {
+			if(AntiSwear.equalsIgnoreCase(str1, off1, str2, off2, len2)) {
 				return off1;
 			}
 		}
@@ -322,9 +348,9 @@ public class AntiSwear extends JavaPlugin implements Listener {
 						if((chlen + choff) > in_len) {
 							chlen = in_len - in_off - choff;
 						}
-						wh_index = AntiSwear.indexOf(in, choff, chlen, wh, 0, wh_len);
+						wh_index = AntiSwear.indexOfIgnoreCase(in, choff, chlen, wh, 0, wh_len);
 						if(wh_index == -1) {
-							wh_index = AntiSwear.indexOf(wh, 0, wh_len, in, choff, chlen);
+							wh_index = AntiSwear.indexOfIgnoreCase(wh, 0, wh_len, in, choff, chlen);
 						}
 						if(wh_index != -1) {
 							break;
@@ -333,7 +359,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 					if(wh_index != -1) {
 						continue;
 					}
-					if(startfrom != start) {
+					if(start > startfrom) {
 						sb.append(in, startfrom, (start - startfrom));
 					}
 					sb.append(replaceto);

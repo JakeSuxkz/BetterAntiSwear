@@ -3,66 +3,13 @@ Don't write hundreds of synonyms or complex regexes, when you can write just wor
 [Under MIT license, opensource.](https://github.com/wordnice/BetterAntiSwear)
 
 
-# Default config with some swears
+# Default config
 
-```yaml
-# Block message with swear
-BlockSwear: false
+*Default config contains English, Polish, Czech and Slovak swears. Just download & enjoy.*
 
-# Allow Operators to swear
-AllowOPSwear: false
+BetterAntiSwear got inteligent filters to detect swears even if they do not match exactly. That means, you don't have to write hunders of synonyms or write complex regexes to avoid swears in your chat, you just tell plugin blacklisted words, few additional whitelisted (like badass) and start your server.
 
-# Message sent to player when swear
-# If you don't want send any message, just leave it empty
-SwearMessage: "&4Don't swear!"
-
-
-
-
-
-# ATENTION
-# CONTENT BELOW DOES NOT LOOK NICE
-
-# Swears, disallowed words
-# Use as
-#    - swear: cen**red
-# (you can use colors &4)
-# Otherwise swear will be replaced by ***
-# 
-# NOTE: Put censored words between apostrophes
-Blacklist:
-- noob: 'n**b'
-- idiot: 'id**t'
-- ass: 'a**'
-- penis: 'pen*s'
-- vagina: 'vag**a'
-- fuck: 'f**k'
-- dick: 'd**k'
-- pussy: 'p***y'
-- stupid: 'st*pid'
-- nerd: 'n**d'
-- stfu: 's***'
-- wtf: 'w**'
-- anus: 'a***'
-- arse: 'a***'
-- arsehole: 'a***'
-- asshole: 'a***'
-- butt: 'b**t'
-- bitch: 'b**ch'
-- crap: 'cr*p'
-- bastard: 'b*stard'
-- boobs: 'b**bs'
-- shit: 'sh*t'
-- piss: 'p*ss'
-
-# Words containing blacklisted words, but are enabled
-Whitelist:
-- ' badass '
-- ' as '
-
-```
-
-This config will block:
+For example, if you got config with blacklisted ass and idiot, and whitelisted badass and as, BetterAntiSwear will disallow:
 
 ```
 ass       --> a**
@@ -89,7 +36,7 @@ as
 ```
 
 
-# Permissions:
+# Permissions
 
 - `BetterAntiSwear.Swear` - If player has this permission, or `AllowOPSwear` from config is allowed and player is operator, his messages are not scaned
 - `BetterAntiSwear.Test` - Test message with `/bas test <message>` command
@@ -103,12 +50,11 @@ as
 * Aliases `betterantiswear`, `antiswear`, `as`
 * Subcommands
 	* `test` - scan entered message
-
-![/bas test lel m8s i gotta rekt u stoopid idiots nubs](/screenshots/bas_test.png)
-
+	* `/bas test <message>`
 
 
-# API:
+
+# API
 
 See [commented sources](https://github.com/wordnice/BetterAntiSwear/blob/master/src/eu/wordnice/antiswear/AntiSwear.java). You may use:
 
@@ -119,7 +65,7 @@ See [commented sources](https://github.com/wordnice/BetterAntiSwear/blob/master/
 	 * 
 	 * @return If swear(s) were found, returns new modified string. Otherwise returns `null`
 	 */
-	public static String processString(String in, String[] mini)
+	public static String processString(String in, String[] mini) {...}
 ```
 
 As:
