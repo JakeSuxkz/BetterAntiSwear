@@ -344,7 +344,7 @@ public class AntiSwear extends JavaPlugin implements Listener {
 						if(choff < in_off) {
 							choff = in_off;
 						}
-						chlen = (chlen * 2) + wh_len;
+						chlen = (chlen * 2) + swear.length;
 						if((chlen + choff) > in_len) {
 							chlen = in_len - in_off - choff;
 						}
