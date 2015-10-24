@@ -5,27 +5,26 @@ Don't write hundreds of synonyms or complex regexes, when you can write just wor
 
 # Default config
 
-*Default config contains English, Polish, Czech and Slovak swears. Just download & enjoy.*
+*Default config for Bukkit server contains English, Polish, Czech and Slovak swears. Just download & enjoy.*
 
-BetterAntiSwear got inteligent filters to detect swears even if they do not match exactly. That means, you don't have to write hunders of synonyms or write complex regexes to avoid swears in your chat, you just tell plugin blacklisted words, few additional whitelisted (like badass) and start your server.
+BetterAntiSwear got inteligent filters to detect swears even if they do not match exactly. That means, you don't have to write hunders of synonyms or write complex regexes to avoid swears in your chat - you just tell plugin blacklisted words, few additional whitelisted (like badass) and start your server.
 
-For example, if you got config with blacklisted ass and idiot, and whitelisted badass and as, BetterAntiSwear will disallow:
+BetterAntiSwear was originally made as Bukkit plugin, but is fully compatible with plain Java, and removing Bukkit support is really easy - remove AntiSwearPlugin.java and unimport ChatColor and ConfigurationSection from AntiSwear.java.
+
+For example, if you got config with blacklisted duck and noob (as d\*ck and n\*\*b), and whitelisted ducks, BetterAntiSwear will do the following:
 
 ```
-ass       --> a**
-áss       --> a**
-A$S       --> a**
-A.S.S     --> a**
-4.$.$     --> a**
-AssSSs    --> a**
+duck.     -> d*ck.
+!D.u.C.K! -> !d*ck!
+DUUUUCK   -> d*ck
+DuCKs!    -> DuCKs!
+DuCkS     -> DuCkS
+Duucks    -> d*cks
 
-noob      --> n**b
-n00b      --> n**b
-nob       --> n**b
-nôb       --> n**b
-n0b       --> n**b
-nub       --> n**b
-ňúb       --> n**b
+noob      -> n**b
+nôb??     -> n**b??
+n0b!      -> n**b!
+Ň.ôB      -> n**b
 ```
 
 but will allow:
@@ -56,28 +55,55 @@ as
 
 # API
 
-See [commented sources](https://github.com/wordnice/BetterAntiSwear/blob/master/src/eu/wordnice/antiswear/AntiSwear.java). You may use:
-
 ```java
-	/**
-	 * @param in Message to check and process
-	 * @param mini If not null and length >= 1, mini[0] is filled with minimalized string
-	 * 
-	 * @return If swear(s) were found, returns new modified string. Otherwise returns `null`
-	 */
-	public static String processString(String in, String[] mini) {...}
+
+		AntiSwear as = AntiSwear.getLast();
+		
+		//If antiswear instance was found, use it
+		//Oterwise create new
+		if(as == null) {
+			as = AntiSwear.getNew();
+			AntiSwear.setLast(as);
+			
+			//Add blacklisted words
+			as.addBlacklist("idiot", "idi*t");
+			as.addBlacklist("noob", "n**b");
+			
+			//Add blacklisted words from map
+			Map<String,String> bl = new HashMap<String,String>();
+			bl.put("duck", "d**k");
+			bl.put("ass", "as*");
+			as.addBlacklist(bl);
+			
+			//Add whitelisted words
+			//Space will match punctation, any space and start/end of text
+			//    see AntiSwear.WHITELIST_SPACE_EQUALS
+			as.addWhitelist(" ducks ", " badass ");
+		}
+		
+		
+		//string to check
+		String message = "My little pony, badass duck need ducks! A$shole, Nub, n00bs!";
+		
+		//process string
+		System.out.print("Processing string: ");
+		System.out.println(message);
+		String nevMessage = as.processString(message);
+		
+		if(nevMessage == null) {
+			//If processString returned null, given message does not
+			//contains swears!
+			System.out.println("Not swears were found!");
+		} else {
+			//Otherwise swears were found and removed
+			System.out.println("Swears were found! New message is:");
+			System.out.println(nevMessage);
+			
+			//If using our settings, swears will be found
+			//and we will get new message:
+			//My little pony, badass d**k need ducks! as*hole, n**b, n**bs!
+		}
+
 ```
 
-As:
-
-```java
-	String message = "hello nubs!";
-	String nevmessage = AntiSwears.processString(message, null);
-	if(nevmessage == null) {
-		nevmessage = message;
-		//No swears were found
-	} else {
-		//Swears were found
-	}
-	//Done, "nevmessage" variable contains censored words, use it as you want
-```
+[Source code](https://github.com/wordnice/BetterAntiSwear/blob/master/src/eu/wordnice/antiswear/AntiSwear.java)
